@@ -1,17 +1,15 @@
-<!DOCTYPE html>
-<head>
-    <meta charset="UTF-8">
-    {% block head_imports %}
-    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-    {% endblock head_imports %}
-
-    {% load static %}
-    <script src="{% static 'js/func.js' %}"></script>
-</head>
-<h1>Cadastro de usuário</h1>
+{% extends 'meulogin/base.html' %}
+{% block content %}
+<h2>Login</h2>
 <form method="post">
     {% csrf_token %}
-    {% for field in form %}
+    {{formLogin.as_p}}
+    <button type="submit" name="login">Login</button>
+</form>
+<h2>Cadastro de usuário</h2>
+<form method="post">
+    {% csrf_token %}
+    {% for field in formCadastro %}
         <p>
             {{ field.label_tag }}<br>
             {{ field }} <br>
@@ -23,6 +21,6 @@
             {% endfor %}
         </p>
     {% endfor %}
-    <button type="submit">Cadastrar</button>
+    <button type="submit" name="cadastro">Cadastrar</button>
 </form>
-
+{% endblock %}
