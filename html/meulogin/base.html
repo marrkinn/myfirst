@@ -9,8 +9,30 @@
 
     {% load static %}
     <script src="{% static 'js/func.js' %}"></script>
+
+    <style>
+        table {
+          font-family: arial, sans-serif;
+          border-collapse: collapse;
+          width: 100%;
+        }
+
+        td, th {
+          border: 1px solid #dddddd;
+          text-align: left;
+          padding: 8px;
+        }
+
+        tr:nth-child(even) {
+          background-color: #dddddd;
+        }
+    </style>
+
 </head>
 <body>
+{% if user.is_authenticated %}
+    <h3>{{ user.username }}</h3>
+{% endif %}
 
 {% if messages %}
 <ul class="messages">
@@ -19,7 +41,6 @@
     {% endfor %}
 </ul>
 {% endif %}
-
 {% block content %}
 {% endblock %}
 

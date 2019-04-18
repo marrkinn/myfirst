@@ -4,14 +4,19 @@ from django.contrib.auth.forms import PasswordChangeForm, AuthenticationForm
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate, update_session_auth_hash
-from forms import SignUpForm
+from forms import SignUpForm, RocklabUserForm
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
+from models import RocklabUser
 
 
 # Create your views here.
+@transaction.atomic
 def cadastrar_usuario(request):
     formLogin = AuthenticationForm()
     formCadastro = SignUpForm()
+    formUserRocklab = RocklabUserForm()
     if request.method == 'POST':
         print '[views] entrou no POST'
         if 'login' in request.POST:
@@ -27,8 +32,10 @@ def cadastrar_usuario(request):
 
         elif 'cadastro' in request.POST:
             formCadastro = SignUpForm(request.POST)
-            if formCadastro.is_valid():
+            formUserRocklab = RocklabUserForm(request.POST, instance=request.user.rocklabuser)
+            if formCadastro.is_valid() and formUserRocklab.is_valid():
                 formCadastro.save()
+                formUserRocklab.save()
                 username = formCadastro.cleaned_data.get('username')
                 raw_password = formCadastro.cleaned_data.get('password1')
                 user = authenticate(username=username, password=raw_password)
@@ -37,13 +44,15 @@ def cadastrar_usuario(request):
 
         else:
             print '[views] request.POST',request.POST
-    return render(request, "meulogin/index.html", {'formLogin':formLogin, 'formCadastro':formCadastro})
+    return render(request, "meulogin/index.html", {'formLogin':formLogin, 'formCadastro':formCadastro, 'formUserRocklab':formUserRocklab})
 
+@login_required
 def sucesso_cadastrar_usuario(request):
-    users = User.objects.all()
+    users = RocklabUser.objects.all()
     return render(request, 'meulogin/sucesso.html', {"users": users})
 
-def edit_profile(request):
+@login_required
+def edit_password(request):
     if request.method == 'POST':
         formChangePassword = PasswordChangeForm(request.user, request.POST)
         print 'user', request.user
@@ -59,3 +68,18 @@ def edit_profile(request):
         formChangePassword = PasswordChangeForm(request.user)
 
     return render(request, 'meulogin/password.html', {'formChangePassword': formChangePassword})
+
+@login_required
+def edit_profile(request):
+    formEditProfile = RocklabUserForm()
+    if request.method == 'POST':
+        formEditProfile = RocklabUserForm(request.POST, instance=request.user.rocklabuser)
+        if formEditProfile.is_valid():
+            formEditProfile.save()
+            messages.success(request, "Dados atualizados com sucesso.")
+            return redirect('/sucesso')
+        else:
+            print '-----------------------[views] formEditProfile.errors', formEditProfile.errors
+            messages.error(request, 'Dados inválidos.')
+    else:
+        return render(request, 'meulogin/edit_profile.html', {'formEditProfile':formEditProfile})

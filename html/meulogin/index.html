@@ -9,16 +9,23 @@
 <h2>Cadastro de usuário</h2>
 <form method="post">
     {% csrf_token %}
+    {{ formCadastro.username.label_tag }}<br>
+    {{ formCadastro.username }}<br>
+    <small>{{ formCadastro.username.help_text }}</small><br>
+    {{ formCadastro.username.errors}}
+    {{ formUserRocklab.as_p }}
     {% for field in formCadastro %}
         <p>
-            {{ field.label_tag }}<br>
-            {{ field }} <br>
-            {% if field.help_text %}
-                <small>{{ field.help_text | safe }}</small>
+            {% if field.name != 'username' %}
+                {{ field.label_tag }}<br>
+                {{ field }} <br>
+                {% if field.help_text %}
+                    <small>{{ field.help_text | safe }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                    <p style="color: red">{{ error }}</p>
+                {% endfor %}
             {% endif %}
-            {% for error in field.errors %}
-                <p style="color: red">{{ error }}</p>
-            {% endfor %}
         </p>
     {% endfor %}
     <button type="submit" name="cadastro">Cadastrar</button>

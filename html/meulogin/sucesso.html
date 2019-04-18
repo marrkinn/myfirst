@@ -2,9 +2,24 @@
 {% block content %}
 
 <h1>Usuário cadastrado com sucesso.</h1><br>
-<h2>Usuários cadastrados:</h2>
-{% for username in users %}
-    {{username}}<br>
-{% endfor %}
+<h2>Usuários cadastrados:</h2><br>
+<h2>Tabela de usuários cadastrados</h2>
+<table>
+    <tr>
+        <th>Nome</th>
+        <th>Endereço</th>
+        <th>Empresa</th>
+        <th>Último Login</th>
+    </tr>
+    {% for user in users %}
+        <tr>
+            <td>{{user.user.username}}</td>
+            <td>{{user.endereco|default:"-"}}</td>
+            <td>{{user.empresa|default:"-"}}</td>
+            <td>{{user.user.last_login|default:"-"}}</td>
+        </tr>
+
+    {% endfor %}
+</table>
 
 {% endblock %}
