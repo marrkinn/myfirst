@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from django.contrib.auth.forms import PasswordChangeForm, AuthenticationForm
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
-from django.contrib.auth import login, authenticate, update_session_auth_hash
+from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from forms import SignUpForm, RocklabUserForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -55,7 +55,7 @@ def sucesso_cadastrar_usuario(request):
 def edit_password(request):
     if request.method == 'POST':
         formChangePassword = PasswordChangeForm(request.user, request.POST)
-        print 'user', request.user
+        print '[views] user', request.user
 
         if formChangePassword.is_valid():
             user = formChangePassword.save()
@@ -83,3 +83,8 @@ def edit_profile(request):
             messages.error(request, 'Dados inválidos.')
     else:
         return render(request, 'meulogin/edit_profile.html', {'formEditProfile':formEditProfile})
+
+@login_required
+def logout_view(request):
+    logout(request)
+    return redirect('/')
