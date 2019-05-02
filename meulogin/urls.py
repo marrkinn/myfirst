@@ -15,7 +15,6 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
-from django.contrib.auth import views as auth_views
 from views import cadastrar_usuario, sucesso_cadastrar_usuario, edit_password, edit_profile, logout_view, activate
 
 

@@ -127,25 +127,9 @@ STATIC_URL = '/static/'
 LOGIN_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
-EMAIL_USE_TLS = True
+EMAIL_USE_SSL = True
 EMAIL_HOST = 'smtpout.secureserver.net'     # servidor Godaddy do Rocklab
 EMAIL_HOST_USER = 'suporte@rocklabdigital.com' # remetente
 EMAIL_HOST_PASSWORD = '#18rocklab'
 EMAIL_PORT = 465
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-# EMAIL_HOST = 'smtpout.secureserver.net'     # servidor Godaddy do Rocklab
-# EMAIL_SENDER = 'suporte@rocklabdigital.com' # remetente
-# EMAIL_SENDER_PASSWORD = '#18rocklab'
-# EMAIL_HOST_USER = 'rocklab@petrec.com.br'   # destinatario quando alguem se cadastrar (servidor de producao)
-# EMAIL_DEV_USER = 'dev@petrec.com.br'        # destinatario quando alguem se cadastrar (settings.DEBUG = True)
-# EMAIL_PORT = 465
-
-INTERNAL_IPS = [
-    '127.0.0.1',
-    '0.0.0.0'
-]
-AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend', # this is default
-    'guardian.backends.ObjectPermissionBackend',
-)
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

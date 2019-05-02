@@ -12,12 +12,13 @@ from models import RocklabUser
 
 #importes para confirmação por email
 from django.http import HttpResponse
-from django.core.mail import EmailMessage
-from django.template.loader import render_to_string
+from django.core.mail import EmailMultiAlternatives
 from django.contrib.sites.shortcuts import get_current_site
 from .tokens import account_activation_token
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.conf import settings
+from django.template.loader import get_template
 
 # Create your views here.
 @transaction.atomic
@@ -39,53 +40,63 @@ def cadastrar_usuario(request):
                 messages.error(request, 'Usuário e senha inválidos.')
 
         elif 'cadastro' in request.POST:
+
+            #Formularios de cadastro dos dados do usuario
             formCadastro = SignUpForm(request.POST)
             formUserRocklab = RocklabUserForm(request.POST)
+
+            # Validando os valores dos campos do form
             if formCadastro.is_valid() and formUserRocklab.is_valid():
-                # formCadastro.save()
-                # username = formCadastro.cleaned_data.get('username')
-                # raw_password = formCadastro.cleaned_data.get('password1')
-                # user = authenticate(username=username, password=raw_password)
-                # login(request, user)
-                # return redirect('/sucesso')
+
+                #Travando user para futura validacao por email
                 user = formCadastro.save(commit=False)
                 user.is_active = False
                 user.save()
 
+                #Salvando o formulario em um variavel(objeto)
                 newRocklabUser = formUserRocklab.save(commit=False)
-                # print "===============[voiews] newRocklabUser.empresa",newRocklabUser.empresa
 
-                # fields = list(RocklabUserForm().base_fields)
-                # print "===============[voiews] fields ",fields
 
                 for field in list(RocklabUserForm().base_fields):
-                    # print "++++++++++++[voiews] field ", field
+                    # setando os atributos preenchidos no formulario para o rocklabuser
                     setattr(user.rocklabuser, field, getattr(newRocklabUser, field))
                     user.rocklabuser.save()
 
-                print "[views] +++++++++++ user", user
-
-
-                # newRocklabUser.user = user
-                # print '[views] type(user)', type(user)
-                # newRocklabUser.save()
-                # print '[views] antes do current site '
                 current_site = get_current_site(request)
-                mail_subject = 'Activate your account.'
-                message = render_to_string('meulogin/acc_active_email.html', {
+                mail_subject = 'Ative sua conta.'
+
+                # Obtendo o conteudo do email sob a forma de pagina html
+                email_template = get_template('meulogin/acc_active_email.html')
+
+                #Dados do usuario para mensagem a ser enviada
+                message = {
                     'user': user,
                     'domain': current_site.domain,
                     'uid': urlsafe_base64_encode(force_bytes(user.pk)),
                     'token': account_activation_token.make_token(user),
-                })
+                }
+
+                html_content = email_template.render(message)
 
                 to_email = formCadastro.cleaned_data.get('email')
-                email = EmailMessage(
-                    mail_subject, message, to=[to_email]
+
+                # Construindo o email a ser enviado e criando uma nova coneccao com o servidor do email
+                email = EmailMultiAlternatives(
+                    mail_subject, '', from_email=settings.EMAIL_HOST_USER, to=[to_email]
                 )
-                print '[views] antes do email send'
-                # email.send()
-                # print '[views] depois do email send'
+
+                # Enviando a pagina renderizada para o email
+                email.attach_alternative(html_content, "text/html")
+
+                # Obtendo a conexao com o servidor do email
+                email_connection = email.get_connection()
+
+                # Enviando email
+                email_connection.username = settings.EMAIL_HOST_USER
+                email_connection.password = settings.EMAIL_HOST_PASSWORD
+                email.send()
+
+
                 return HttpResponse('Please confirm your email address to complete the registration')
 
         else:
